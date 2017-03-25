@@ -37,7 +37,7 @@ int SetKernelBrk(void *addr) {
 }
 
 void
-brk_handler(ExceptionStackFrame *frame){
+brk_handler(ExceptionInfo *frame){
   void *addr = (void *)frame->regs[1];
   int i;
 

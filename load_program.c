@@ -26,7 +26,7 @@
  *  in this case.
  */
 int
-LoadProgram(char *name, char **args, ExceptionStackFrame *frame, struct pte *page_table_to_load)
+LoadProgram(char *name, char **args, ExceptionInfo *frame, struct pte *page_table_to_load)
 {
     int fd;
     int status;

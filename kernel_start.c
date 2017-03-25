@@ -13,7 +13,7 @@
 void **interrupt_vector_table;
 int is_init = 1;
 
-void KernelStart(ExceptionStackFrame *frame, unsigned int pmem_size, void *orig_brk, char **cmd_args) {
+void KernelStart(ExceptionInfo *frame, unsigned int pmem_size, void *orig_brk, char **cmd_args) {
     TracePrintf(1, "kernel_start: KernelStart called with num physical pages: %d.\n", pmem_size/PAGESIZE);
 
   int i;

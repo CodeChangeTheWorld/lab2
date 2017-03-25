@@ -7,19 +7,19 @@
 #include "load_program.h"
 #include "terminals.h"
 
-void getpid_handler(ExceptionStackFrame *frame);
-void delay_handler(ExceptionStackFrame *frame);
-void exit_handler(ExceptionStackFrame *frame, int error);
-void fork_trap_handler(ExceptionStackFrame *frame);
-void wait_trap_handler(ExceptionStackFrame *frame);
-void exec_trap_handler(ExceptionStackFrame *frame);
-void tty_read_handler(ExceptionStackFrame *frame);
-void tty_write_handler(ExceptionStackFrame *frame);
+void getpid_handler(ExceptionInfo *frame);
+void delay_handler(ExceptionInfo *frame);
+void exit_handler(ExceptionInfo *frame, int error);
+void fork_trap_handler(ExceptionInfo *frame);
+void wait_trap_handler(ExceptionInfo *frame);
+void exec_trap_handler(ExceptionInfo *frame);
+void tty_read_handler(ExceptionInfo *frame);
+void tty_write_handler(ExceptionInfo *frame);
 
 #define SCHEDULE_DELAY  2
 int time_till_switch = SCHEDULE_DELAY;
 
-void kernel_trap_handler(ExceptionStackFrame *frame) {
+void kernel_trap_handler(ExceptionInfo *frame) {
   TracePrintf(1, "trap_handlers: Entering TRAP_KERNEL interrupt handler...\n");
 
   int code = frame->code;
@@ -65,7 +65,7 @@ void kernel_trap_handler(ExceptionStackFrame *frame) {
 
 }
 
-void wait_trap_handler(ExceptionStackFrame *frame){
+void wait_trap_handler(ExceptionInfo *frame){
   int *status_ptr = (int *)frame->regs[1];
 
   struct schedule_item *item = get_head();
@@ -87,7 +87,7 @@ void wait_trap_handler(ExceptionStackFrame *frame){
   frame->regs[0] = esn->pid;
 }
 
-void exec_trap_handler(ExceptionStackFrame *frame){
+void exec_trap_handler(ExceptionInfo *frame){
   char *filename = (char *)frame->regs[1];
   char **argvec = (char **)frame->regs[2];
 
@@ -99,7 +99,7 @@ void exec_trap_handler(ExceptionStackFrame *frame){
   }
 }
 
-void fork_trap_handler(ExceptionStackFrame *frame){
+void fork_trap_handler(ExceptionInfo *frame){
   struct schedule_item *item = get_head();
   struct process_control_block *parent_pcb = item->pcb;
 
@@ -132,7 +132,7 @@ void fork_trap_handler(ExceptionStackFrame *frame){
 
 }
 
-void clock_trap_handler (ExceptionStackFrame *frame) {
+void clock_trap_handler (ExceptionInfo *frame) {
   TracePrintf(1, "trap_handlers: Entering TRAP_CLOCK interrupt handler...\n");
   //TESTING
   TracePrintf(1, "trap_handlers: TRAP CLOCK with PID: %d\n", get_current_pid());
@@ -148,7 +148,7 @@ void clock_trap_handler (ExceptionStackFrame *frame) {
   }
 }
 
-void illegal_trap_handler (ExceptionStackFrame *frame) {
+void illegal_trap_handler (ExceptionInfo *frame) {
   TracePrintf(1, "trap_handlers: Entering TRAP_ILLEGAL interrupt handler...\n");
 
   int code = frame->code;
@@ -160,7 +160,7 @@ void illegal_trap_handler (ExceptionStackFrame *frame) {
   exit_handler(frame, 1);
 }
 
-void memory_trap_handler (ExceptionStackFrame *frame) {
+void memory_trap_handler (ExceptionInfo *frame) {
   TracePrintf(1, "trap_handlers: Entering TRAP_MEMORY interrupt handler...\n");
   struct schedule_item *item = get_head();
   struct process_control_block *pcb = item->pcb;
@@ -197,7 +197,7 @@ void memory_trap_handler (ExceptionStackFrame *frame) {
   exit_handler(frame, 1);
 }
 
-void math_trap_handler (ExceptionStackFrame *frame) {
+void math_trap_handler (ExceptionInfo *frame) {
   TracePrintf(1, "trap_handlers: Entering TRAP_MATH interrupt handler...\n");
 
   int code = frame->code;
@@ -209,7 +209,7 @@ void math_trap_handler (ExceptionStackFrame *frame) {
   exit_handler(frame, 1);
 }
 
-void tty_recieve_trap_handler (ExceptionStackFrame *frame) {
+void tty_recieve_trap_handler (ExceptionInfo *frame) {
   TracePrintf(1, "trap_handlers: Entering TRAP_TTY_RECEIVE interrupt handler...\n");
 
   int terminal = frame->code;  
@@ -228,7 +228,7 @@ void tty_recieve_trap_handler (ExceptionStackFrame *frame) {
 }
 
 void
-tty_transmit_trap_handler (ExceptionStackFrame *frame) {
+tty_transmit_trap_handler (ExceptionInfo *frame) {
   TracePrintf(1, "trap_handlers: Entering TRAP_TTY_TRANSMIT interrupt handler...\n");
 
   int terminal = frame->code;  
@@ -252,7 +252,7 @@ tty_transmit_trap_handler (ExceptionStackFrame *frame) {
 }
 
 void
-tty_read_handler(ExceptionStackFrame *frame) {
+tty_read_handler(ExceptionInfo *frame) {
     int terminal = frame->regs[1];
   if(terminal < 0 || terminal > NUM_TERMINALS){
     frame->regs[0] = ERROR;
@@ -271,7 +271,7 @@ tty_read_handler(ExceptionStackFrame *frame) {
 }
 
 void
-tty_write_handler(ExceptionStackFrame *frame) {
+tty_write_handler(ExceptionInfo *frame) {
   int terminal = frame->regs[1];
   if(terminal < 0 || terminal > NUM_TERMINALS){
     frame->regs[0] = ERROR;
@@ -298,7 +298,7 @@ tty_write_handler(ExceptionStackFrame *frame) {
   }
 }
 
-void getpid_handler(ExceptionStackFrame *frame) {
+void getpid_handler(ExceptionInfo *frame) {
   frame->regs[0] = get_current_pid();
 }
 
@@ -309,7 +309,7 @@ void getpid_handler(ExceptionStackFrame *frame) {
  * 3. call select_next_process() to move the next process to be run to the head
  * 4. context switch from currently running process to that next process
  */
-void delay_handler(ExceptionStackFrame *frame) {
+void delay_handler(ExceptionInfo *frame) {
   int num_ticks_to_wait = frame->regs[1];
   
   if(num_ticks_to_wait < 0){
@@ -329,7 +329,7 @@ void delay_handler(ExceptionStackFrame *frame) {
   return;
 }
 
-void exit_handler(ExceptionStackFrame *frame, int error) {
+void exit_handler(ExceptionInfo *frame, int error) {
   int exit_status;
   if (error) {
     exit_status = ERROR;

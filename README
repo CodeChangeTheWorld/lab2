@@ -33,7 +33,7 @@ kernel_start
 
 load_program
   Uses modified load program template with added parameters:
-    1. ExceptionStackFrame *frame
+    1. ExceptionInfo *frame
       The frame that contains the current stack pointer and program counter.
     2. struct pte *page_table_to_load
       Pointer to the page table of the process we are loading.
