@@ -81,7 +81,7 @@ idle_and_init_initialization(SavedContext *ctxp, void *p1, void *p2) {
 
   TracePrintf(1, "context_switch: idle_and_init_initialization completed.\n");
 
-  return &pcb1->saved_context;  
+  return &pcb2->saved_context;  
 }
 
 SavedContext *
